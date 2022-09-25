@@ -17,3 +17,9 @@
   * In package.json, add under "scripts" a line with `"start": "lite-server"`
   * in terminal, enter `npm start` to start this script; to stop the server press `Ctrl+C` in the terminal where it was started.
 
+  * to have each file in a project folder recompiled as soon as it changes:
+    * one-time action: initialize that folder by running the command `tsc --init` in that folder.  This creates a file `tsconfig.json` in that folder.
+    * after that it is possible to run just `tsc` in order to have all .ts files in the project folder (re-)compiled.
+    * in order to recompile any of those .ts files that chnages, `tsc` can be called in **watch mode** with: `tsc --watch` or `tsc -w`.
+
+
