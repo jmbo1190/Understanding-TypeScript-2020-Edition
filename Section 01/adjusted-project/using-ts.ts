@@ -2,7 +2,7 @@ const button = document.querySelector("button");
 const input1 = document.getElementById("num1")! as HTMLInputElement;  // TS Type casting ensures
 const input2 = document.getElementById("num2")! as HTMLInputElement;  // the type of returned element
 
-function add(num1: number  // type: number
+function add( num1: number  // type: number
             , num2: number
             ) {
   return num1 + num2;
