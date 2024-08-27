@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Understanding TypeScript</title>
+  <script src="app.js" defer></script>
+  <style>
+    .blue {color: blue; font-style: italic; font-size: 40px; border-width: 5px;}
+  </style>
+</head>
+<body>
+  <div ID="one">
+    <p>This is one paragraph</p>
+    <button>Don't press me!</button>
+    <p>This is a link to <a href="https://www.google.com">Google.com</a></p>
+    <button class="blue">Don't press me either!</button>
+    <p>This is a third paragraph</p>
+    <button class="blue">Hands off!</button>
+  </div>
+    <script>
+    document.getElementById("one").appendChild(document.createTextNode("Here is some more text"));
+    var nextPara = document.createElement("p");
+    nextPara.innerText="Here is again more text"
+    document.getElementById("one").appendChild(nextPara);
+    var btn = document.querySelector("button");
+    btn.onclick = function(){alert("oh no you didn't!");};
+    var btn2 = document.querySelector(".blue");
+    btn2.addEventListener("click", function(){ 
+
+      alert("I told you not to press me either!"); 
+    });
+    //btn2.removeEventListener("click",   );
+    var btn3 = document.getElementsByTagName("button")[2];
+    btn3.addEventListener("click", function(event){ 
+      event.target.style.backgroundColor = "magenta";
+      alert("Leave me!"); 
+    });
+
+    var myLink = document.querySelector("a");
+    
+    myLink.addEventListener('click', function(event){
+      event.preventDefault();
+      event.target.parentElement.style.backgroundColor = "orange";
+      alert("Sorry no Google for you!");
+    });
+  </script>
+</body>
+</html>
