@@ -67,7 +67,41 @@ function autobind(
   return adjustedDescriptor;
 }
 
-//
+// ProjectList Class
+class ProjectList {
+    templateElement: HTMLTemplateElement;
+    hostElement: HTMLDivElement;
+    element: HTMLElement;
+
+    constructor(private type: 'active' | 'finished') {
+        this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
+        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+        const importedNode = document.importNode(this.templateElement.content, true);  // DocumentFragment
+        // Not firstChild (could be an element, comment or text node)
+        // but firstElementChild (ensures this will be an element node)!
+        console.log('importedNode.firstElementChild:', importedNode.firstElementChild); // <section> element
+        console.log('importedNode.firstChild:', importedNode.firstChild); // text note with only spaces
+        // this.element = importedNode.firstElementChild as HTMLElement;
+        this.element = document.importNode(this.templateElement.content, true).firstElementChild as HTMLElement;
+        this.render();
+        this.populate();
+    }
+
+    private populate() {
+        this.element.id = `${this.type}-projects`;
+        console.log('ProjectList.populate() Id:', this.element.id);
+        this.element.querySelector('ul')!.id = `${this.type}-projects-list`;
+        this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
+    }
+
+    private render() {
+        console.log('ProjectList.render() this.element:', this.element);
+        this.hostElement.insertAdjacentElement('beforeend', this.element as Element);
+    }
+
+}
+
+// ProjectInput Class
 class ProjectInput {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
@@ -197,3 +231,5 @@ class ProjectInput {
 }
 
 const prjInput = new ProjectInput();
+const actPrjList = new ProjectList('active');
+const finPrjList = new ProjectList('finished');
