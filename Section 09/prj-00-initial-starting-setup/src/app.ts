@@ -67,12 +67,23 @@ function autobind(
   return adjustedDescriptor;
 }
 
+// Project Status
+enum ProjectStatus { Active, Finished };
+
+// Project
+class Project {
+    constructor(public id: string, public title: string, public description: string, public people: number, public status: ProjectStatus) {
+    }
+}
+
+// Listener
+type Listener =  (projects: Project[]) => void;
 
 // Project State Management - singleton pattern
 class ProjectState {
-    private projects: any[] = [];
+    private projects: Project[] = [];
     private static instance: ProjectState;
-    private listeners: any[] = [];
+    private listeners: Listener[] = [];
 
     private constructor(){
         
@@ -87,19 +98,20 @@ class ProjectState {
     }
 
     addProject(title: string, description: string, people: number){
-        const newProject = {
-            id: Math.random(),
+        const newProject = new Project(
+            Math.random().toString(),
             title,
             description,
-            people
-        };
+            people,
+            ProjectStatus.Active
+        )        
         this.projects.push(newProject);
         for (const listener of this.listeners) {
             listener(this.projects.slice()); // slice returns a copy rather than a reference
         }
     }
 
-    addListener(listenerFn: Function){
+    addListener(listenerFn: Listener){
         this.listeners.push(listenerFn);
     }
 }
@@ -113,7 +125,7 @@ class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
-    assignedProjects: any[];
+    assignedProjects: Project[];
 
     constructor(private type: 'active' | 'finished') {
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
@@ -126,7 +138,7 @@ class ProjectList {
         // this.element = importedNode.firstElementChild as HTMLElement;
         this.element = document.importNode(this.templateElement.content, true).firstElementChild as HTMLElement;
         this.assignedProjects = []; // initialize
-        globalProjectState.addListener((projects: any[]) => {
+        globalProjectState.addListener((projects: Project[]) => {
             this.assignedProjects = projects;
             this.renderProjects();
         })
