@@ -70,8 +70,9 @@ function autobind(
 
 // Project State Management - singleton pattern
 class ProjectState {
-    private projectsList: any[] = [];
+    private projects: any[] = [];
     private static instance: ProjectState;
+    private listeners: any[] = [];
 
     private constructor(){
         
@@ -92,7 +93,14 @@ class ProjectState {
             description,
             people
         };
-        this.projectsList.push(newProject);
+        this.projects.push(newProject);
+        for (const listener of this.listeners) {
+            listener(this.projects.slice()); // slice returns a copy rather than a reference
+        }
+    }
+
+    addListener(listenerFn: Function){
+        this.listeners.push(listenerFn);
     }
 }
 
@@ -105,6 +113,7 @@ class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
+    assignedProjects: any[];
 
     constructor(private type: 'active' | 'finished') {
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
@@ -116,6 +125,11 @@ class ProjectList {
         console.log('importedNode.firstChild:', importedNode.firstChild); // text note with only spaces
         // this.element = importedNode.firstElementChild as HTMLElement;
         this.element = document.importNode(this.templateElement.content, true).firstElementChild as HTMLElement;
+        this.assignedProjects = []; // initialize
+        globalProjectState.addListener((projects: any[]) => {
+            this.assignedProjects = projects;
+            this.renderProjects();
+        })
         this.render();
         this.populate();
     }
@@ -130,6 +144,15 @@ class ProjectList {
     private render() {
         console.log('ProjectList.render() this.element:', this.element);
         this.hostElement.insertAdjacentElement('beforeend', this.element as Element);
+    }
+
+    private renderProjects() {
+        const listElem = this.element.querySelector(`#${this.type}-projects-list`)! as HTMLUListElement;
+        for (const prj of this.assignedProjects){
+            const prjElem = document.createElement('li');
+            prjElem.textContent = prj.title;
+            listElem.appendChild(prjElem);
+        }
     }
 
 }
