@@ -67,6 +67,26 @@ function autobind(
   return adjustedDescriptor;
 }
 
+
+// Project State Management
+class ProjectState {
+    private projectsList: any[] = [];
+
+    addProject(title:string, description:string, people:number){
+        const newProject = {
+            id: Math.random(),
+            title,
+            description,
+            people
+        };
+        this.projectsList.push(newProject);
+    }
+}
+
+const globalProjectState = new ProjectState;
+
+
+
 // ProjectList Class
 class ProjectList {
     templateElement: HTMLTemplateElement;
@@ -161,6 +181,7 @@ class ProjectInput {
     if (userInput) {
       const [title, desc, people] = userInput;
       console.log(title, desc, people);
+      globalProjectState.addProject(title, desc, people);
       this.clearInputs();
     }
   }
