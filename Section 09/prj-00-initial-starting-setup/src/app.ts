@@ -68,11 +68,24 @@ function autobind(
 }
 
 
-// Project State Management
+// Project State Management - singleton pattern
 class ProjectState {
     private projectsList: any[] = [];
+    private static instance: ProjectState;
 
-    addProject(title:string, description:string, people:number){
+    private constructor(){
+        
+    }
+
+    static getInstance(){
+        if (this.instance) {
+            return this.instance;
+        }
+        this.instance = new ProjectState();
+        return this.instance;
+    }
+
+    addProject(title: string, description: string, people: number){
         const newProject = {
             id: Math.random(),
             title,
@@ -83,7 +96,7 @@ class ProjectState {
     }
 }
 
-const globalProjectState = new ProjectState;
+const globalProjectState = ProjectState.getInstance();
 
 
 
