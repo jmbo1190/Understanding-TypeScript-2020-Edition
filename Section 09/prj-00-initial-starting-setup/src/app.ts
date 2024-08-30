@@ -139,7 +139,13 @@ class ProjectList {
         this.element = document.importNode(this.templateElement.content, true).firstElementChild as HTMLElement;
         this.assignedProjects = []; // initialize
         globalProjectState.addListener((projects: Project[]) => {
-            this.assignedProjects = projects;
+            const relevantProjects = projects.filter( prj => {
+                if (this.type === 'active') {
+                    return prj.status === ProjectStatus.Active;
+                }
+                return prj.status === ProjectStatus.Finished;
+            })
+            this.assignedProjects = relevantProjects;
             this.renderProjects();
         })
         this.render();
@@ -160,6 +166,7 @@ class ProjectList {
 
     private renderProjects() {
         const listElem = this.element.querySelector(`#${this.type}-projects-list`)! as HTMLUListElement;
+        listElem.innerHTML = ''; // remove previous content if any - avoids duplication
         for (const prj of this.assignedProjects){
             const prjElem = document.createElement('li');
             prjElem.textContent = prj.title;
