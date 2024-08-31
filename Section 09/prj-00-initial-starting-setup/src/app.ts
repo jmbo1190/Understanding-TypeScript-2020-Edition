@@ -76,14 +76,27 @@ class Project {
     }
 }
 
-// Listener
-type Listener =  (projects: Project[]) => void;
+// Generic Listener
+type Listener<T> =  (projects: T[]) => void; // NOT: type Listener<T> =  (projects: <T>[]) => void;
+
+// (reusable) State class with generic Listeners
+class State<T> {
+    private listeners: Listener<T>[] = [];
+
+    private constructor(){
+        
+    }
+
+    addListener(listenerFn: Listener<T>){
+        this.listeners.push(listenerFn);
+    }
+}
 
 // Project State Management - singleton pattern
 class ProjectState {
     private projects: Project[] = [];
     private static instance: ProjectState;
-    private listeners: Listener[] = [];
+    private listeners: Listener<Project>[] = [];
 
     private constructor(){
         
@@ -111,7 +124,7 @@ class ProjectState {
         }
     }
 
-    addListener(listenerFn: Listener){
+    addListener(listenerFn: Listener<Project>){
         this.listeners.push(listenerFn);
     }
 }
