@@ -217,41 +217,43 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
 }
 
 // ProjectInput Class
-class ProjectInput {
-  templateElement: HTMLTemplateElement;
-  hostElement: HTMLDivElement;
-  formElement: HTMLFormElement;
+class ProjectInput extends Component<HTMLDivElement, HTMLFormElement>{
+//   templateElement: HTMLTemplateElement;
+//   hostElement: HTMLDivElement;
+//   element: HTMLFormElement;
   titleInputElement: HTMLInputElement;
   descriptionInputElement: HTMLInputElement;
   peopleInputElement: HTMLInputElement;
 
   constructor() {
-    this.templateElement = document.getElementById(
-      "project-input"
-    ) as HTMLTemplateElement;
-    this.hostElement = document.getElementById("app") as HTMLDivElement;
-    console.log("templateElement:", this.templateElement);
-    const importedNode = document.importNode(
-      this.templateElement.content,
-      true
-    ) as DocumentFragment;
-    console.log("importedNode:", importedNode);
-    this.formElement = importedNode.firstElementChild as HTMLFormElement;
-    this.formElement.id = "user-input";
-    this.titleInputElement = this.formElement.querySelector(
+    super("project-input", "app", true, "user-input");
+    // Now done in Base Class constructor
+    // this.templateElement = document.getElementById(
+    //   "project-input"
+    // ) as HTMLTemplateElement;
+    // this.hostElement = document.getElementById("app") as HTMLDivElement;
+    // console.log("templateElement:", this.templateElement);
+    // const importedNode = document.importNode(
+    //   this.templateElement.content,
+    //   true
+    // ) as DocumentFragment;
+    // console.log("importedNode:", importedNode);
+    // this.element = importedNode.firstElementChild as HTMLFormElement;
+    // this.element.id = "user-input";
+    this.titleInputElement = this.element.querySelector(
       "#title"
     ) as HTMLInputElement;
-    this.descriptionInputElement = this.formElement.querySelector(
+    this.descriptionInputElement = this.element.querySelector(
       "#description"
     ) as HTMLInputElement;
-    this.peopleInputElement = this.formElement.querySelector(
+    this.peopleInputElement = this.element.querySelector(
       "#people"
     ) as HTMLInputElement;
-    console.log("formElement:", this.formElement);
+    console.log("formElement:", this.element);
     // console.log('formElement.parentElement:', this.formElement.parentElement); // null
 
     this.configure();
-    this.render();
+    // this.render();
   }
 
   @autobind // decorator will automatically add .bind(this) on decorated method
@@ -287,22 +289,22 @@ class ProjectInput {
     if (!/^bound /.test(this.submitHandler.name)) {
       // Using .bind(this) so in submitHandler `this` will refer to the ProjectInput class instance
       // instead of refering to the event target (i.e. the Form element)
-      this.formElement.addEventListener(
+      this.element.addEventListener(
         "submit",
         this.submitHandler.bind(this)
       );
     } else {
       // Using autobind decorator as an alternative
-      this.formElement.addEventListener("submit", this.submitHandler);
+      this.element.addEventListener("submit", this.submitHandler);
     }
   }
-
-  private render() {
-    this.hostElement.insertAdjacentElement(
-      "afterbegin",
-      this.formElement
-    ) as HTMLFormElement;
-  }
+// Now done in Base Class constructor
+//   private render() {
+//     this.hostElement.insertAdjacentElement(
+//       "afterbegin",
+//       this.formElement
+//     ) as HTMLFormElement;
+//   }
 
   private gatherUserInput(): [string, string, number] | void {
     const enteredTitle = this.titleInputElement.value;
