@@ -134,7 +134,7 @@ const globalProjectState = ProjectState.getInstance();
 
 
 // Component Class
-class Component<T extends HTMLElement, U extends HTMLElement> {
+abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     templateElement: HTMLTemplateElement;
     hostElement: T; // e.g. HTMLDivElement;
     element: U;     // e.g. HTMLElement;
@@ -159,14 +159,56 @@ class Component<T extends HTMLElement, U extends HTMLElement> {
         if (elementId) {
             this.element.id = elementId;
         }
-        this.render(insertFirst);
+        this.attach(insertFirst);
     }
 
-    private render(insertFirst: boolean) {
+    private attach(insertFirst: boolean) {
         this.hostElement
             .insertAdjacentElement(insertFirst ? 'afterbegin' : 'beforeend'
                 , this.element as Element);
     }
+}
+
+// ProjectItem Class
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+    private project: Project;
+
+    get persons () {
+        if (this.project.people === 1) return "1 person";
+        return `${this.project.people} persons`;
+    }
+
+    constructor(hostElementId: string , project: Project){
+        super('single-project', hostElementId, false, project.id);
+        this.project = project;
+        this.configure();
+        this.render();
+    }
+
+    private configure(){
+        if (! this.element.querySelector('h2')) {
+            const titleElem = document.createElement('h2');
+            this.element.appendChild(titleElem);
+        }
+        if (! this.element.querySelector('h2')) {
+            const peopleElem = document.createElement('h3');
+            this.element.appendChild(peopleElem);
+        }
+        if (! this.element.querySelector('p')) {
+            const descrElem = document.createElement('p');
+            this.element.appendChild(descrElem);
+        }
+    }
+    
+    private render(){
+        const titleElem = this.element.querySelector('h2')!;
+        titleElem.textContent = this.project.title;
+        const peopleElem = this.element.querySelector('h3')!;
+        peopleElem.textContent = `${this.persons} assigned`;
+        const descrElem = this.element.querySelector('p')!;
+        descrElem.textContent = this.project.description;
+    }
+
 }
 
 // ProjectList Class
@@ -199,9 +241,10 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
         const listElem = this.element.querySelector(`#${this.type}-projects-list`)! as HTMLUListElement;
         listElem.innerHTML = ''; // remove previous content if any - avoids duplication
         for (const prj of this.assignedProjects){
-            const prjElem = document.createElement('li');
-            prjElem.textContent = prj.title;
-            listElem.appendChild(prjElem);
+            // const prjElem = document.createElement('li');
+            // prjElem.textContent = prj.title;
+            // listElem.appendChild(prjElem);
+            new ProjectItem(`${this.type}-projects-list`, prj);
         }
     }
 
