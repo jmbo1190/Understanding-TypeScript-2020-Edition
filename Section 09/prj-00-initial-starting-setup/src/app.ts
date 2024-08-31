@@ -119,24 +119,63 @@ class ProjectState {
 const globalProjectState = ProjectState.getInstance();
 
 
+// Component Class
+class Component<T extends HTMLElement, U extends HTMLElement> {
+    templateElement: HTMLTemplateElement;
+    hostElement: T; // e.g. HTMLDivElement;
+    element: U;     // e.g. HTMLElement;
+
+    constructor (
+           templateElementId: string // e.g. 'project-list'
+        ,  hostElementId: string     // e.g. 'app'
+        ,  insertFirst: boolean
+        ,  elementId?: string
+    ) {
+        this.templateElement = document.getElementById(templateElementId)! as HTMLTemplateElement;
+        this.hostElement = document.getElementById(hostElementId)! as T; // e;g. HTMLDivElement;
+        // Not: firstChild (could be an element, comment or text node),
+        // but firstElementChild (ensures this will be an element node)!
+        //   const importedNode = document.importNode(this.templateElement.content, true);  // DocumentFragment
+        //   this.element = importedNode.firstElementChild as HTMLElement;
+        //   console.log('importedNode.firstElementChild:', importedNode.firstElementChild); // <section> element
+        //   console.log('importedNode.firstChild:', importedNode.firstChild); // text note with only spaces
+        this.element = document
+            .importNode(this.templateElement.content, true)
+            .firstElementChild as U; // e.g. HTMLElement;
+        if (elementId) {
+            this.element.id = elementId;
+        }
+        this.render(insertFirst);
+    }
+
+    private render(insertFirst: boolean) {
+        this.hostElement
+            .insertAdjacentElement(insertFirst ? 'afterbegin' : 'beforeend'
+                , this.element as Element);
+    }
+}
 
 // ProjectList Class
-class ProjectList {
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    element: HTMLElement;
+class ProjectList extends Component<HTMLDivElement, HTMLElement>{
+    // templateElement: HTMLTemplateElement;  // now inherited
+    // hostElement: HTMLDivElement;  // now inherited
+    // element: HTMLElement;  // now inherited
     assignedProjects: Project[];
 
     constructor(private type: 'active' | 'finished') {
-        this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
-        const importedNode = document.importNode(this.templateElement.content, true);  // DocumentFragment
+        super('project-list', 'app', false, `${type}-projects`);
+        // The following initialization is now done by the Base class constructor:
+        // this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
+        // this.hostElement = document.getElementById('app')! as HTMLDivElement;
+        // const importedNode = document.importNode(this.templateElement.content, true);  // DocumentFragment
         // Not firstChild (could be an element, comment or text node)
         // but firstElementChild (ensures this will be an element node)!
-        console.log('importedNode.firstElementChild:', importedNode.firstElementChild); // <section> element
-        console.log('importedNode.firstChild:', importedNode.firstChild); // text note with only spaces
+        // console.log('importedNode.firstElementChild:', importedNode.firstElementChild); // <section> element
+        // console.log('importedNode.firstChild:', importedNode.firstChild); // text note with only spaces
         // this.element = importedNode.firstElementChild as HTMLElement;
-        this.element = document.importNode(this.templateElement.content, true).firstElementChild as HTMLElement;
+        // this.element = document.importNode(this.templateElement.content, true).firstElementChild as HTMLElement;
+        // this.element.id = `${this.type}-projects`;
+    
         this.assignedProjects = []; // initialize
         globalProjectState.addListener((projects: Project[]) => {
             const relevantProjects = projects.filter( prj => {
@@ -148,21 +187,22 @@ class ProjectList {
             this.assignedProjects = relevantProjects;
             this.renderProjects();
         })
-        this.render();
+        // this.render();  // now done in Base class constructor
         this.populate();
     }
 
     private populate() {
-        this.element.id = `${this.type}-projects`;
+        // this.element.id = `${this.type}-projects`;  // now done in Base class constructor
         console.log('ProjectList.populate() Id:', this.element.id);
         this.element.querySelector('ul')!.id = `${this.type}-projects-list`;
         this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
     }
 
-    private render() {
-        console.log('ProjectList.render() this.element:', this.element);
-        this.hostElement.insertAdjacentElement('beforeend', this.element as Element);
-    }
+    // method moved to Base Class
+    // private render() {
+    //     console.log('ProjectList.render() this.element:', this.element);
+    //     this.hostElement.insertAdjacentElement('beforeend', this.element as Element);
+    // }
 
     private renderProjects() {
         const listElem = this.element.querySelector(`#${this.type}-projects-list`)! as HTMLUListElement;
