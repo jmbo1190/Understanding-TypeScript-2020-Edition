@@ -128,8 +128,8 @@ class Component<T extends HTMLElement, U extends HTMLElement> {
     constructor (
            templateElementId: string // e.g. 'project-list'
         ,  hostElementId: string     // e.g. 'app'
-        ,  insertFirst: boolean
-        ,  elementId?: string
+        ,  insertFirst: boolean      // true: insertAdjacentElement 'afterbegin' / false: 'beforeend'
+        ,  elementId?: string        // e.g. 'active-projects', 'finished-projects' or 'user-input'
     ) {
         this.templateElement = document.getElementById(templateElementId)! as HTMLTemplateElement;
         this.hostElement = document.getElementById(hostElementId)! as T; // e;g. HTMLDivElement;
