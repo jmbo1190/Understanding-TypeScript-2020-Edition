@@ -76,6 +76,19 @@ class Project {
     }
 }
 
+// Darg & Drop Interfaces
+interface Draggable {
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget {
+    dragOverHandler(event: DragEvent): void;
+    dropHandler(event: DragEvent): void;
+    dragLeaveHandler(event: DragEvent): void;
+}
+
+
 // Generic Listener
 type Listener<T> =  (projects: T[]) => void; // NOT: type Listener<T> =  (projects: <T>[]) => void;
 
@@ -170,10 +183,12 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 }
 
 // ProjectItem Class
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements Draggable {
     private project: Project;
 
     get persons () {
+        console.log('(get persons): this.project:', this.project)
+        if (! this.project.people) return "???";
         if (this.project.people === 1) return "1 person";
         return `${this.project.people} persons`;
     }
@@ -185,12 +200,27 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
         this.render();
     }
 
+    @autobind   // make 'this' refer to ProjectItem rather than to the HTML List Item Element that is the event target
+    dragStartHandler(event: DragEvent) {
+        console.log(event);
+        console.log('event.target:', event.target);
+        console.log('this:', this);
+    }
+
+    @autobind
+    dragEndHandler(_event: DragEvent) {
+        console.log("dragend");
+    }
+
     private configure(){
+        this.element.draggable = true;
+        this.element.addEventListener('dragstart', this.dragStartHandler);
+        this.element.addEventListener('dragend', this.dragEndHandler);
         if (! this.element.querySelector('h2')) {
             const titleElem = document.createElement('h2');
             this.element.appendChild(titleElem);
         }
-        if (! this.element.querySelector('h2')) {
+        if (! this.element.querySelector('h3')) {
             const peopleElem = document.createElement('h3');
             this.element.appendChild(peopleElem);
         }
@@ -201,18 +231,20 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
     }
     
     private render(){
-        const titleElem = this.element.querySelector('h2')!;
+        const titleElem = this.element.querySelector('h2')! as HTMLHeadingElement;
         titleElem.textContent = this.project.title;
-        const peopleElem = this.element.querySelector('h3')!;
-        peopleElem.textContent = `${this.persons} assigned`;
-        const descrElem = this.element.querySelector('p')!;
+        const peopleElem = this.element.querySelector('h3')! as HTMLHeadingElement;
+        peopleElem.textContent = 'xxx';
+        const persons = this.persons;
+        peopleElem.textContent = `${persons} assigned`;
+        const descrElem = this.element.querySelector('p')! as HTMLParagraphElement;
         descrElem.textContent = this.project.description;
     }
 
 }
 
 // ProjectList Class
-class ProjectList extends Component<HTMLDivElement, HTMLElement>{
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget {
     assignedProjects: Project[];
 
     constructor(private type: 'active' | 'finished') {
@@ -231,7 +263,25 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
         this.populate();
     }
 
+    @autobind
+    dragOverHandler(){
+        this.element.classList.add('droppable');
+    }
+
+    @autobind
+    dragLeaveHandler(){
+        this.element.classList.remove('droppable');
+    }
+
+    @autobind
+    dropHandler() {
+
+    }
+
     private populate() {
+        this.element.addEventListener('dragover', this.dragOverHandler);
+        this.element.addEventListener('dragleave', this.dragLeaveHandler);
+        this.element.addEventListener('drop', this.dropHandler);
         console.log('ProjectList.populate() Id:', this.element.id);
         this.element.querySelector('ul')!.id = `${this.type}-projects-list`;
         this.element.querySelector('h2')!.textContent = this.type.toUpperCase() + ' PROJECTS';
