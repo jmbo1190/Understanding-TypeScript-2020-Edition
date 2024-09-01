@@ -125,18 +125,31 @@ class ProjectState extends State<Project>{
 
     addProject(title: string, description: string, people: number){
         const newProject = new Project(
-            Math.random().toString(),
+            'proj-ID'+Math.random().toString(),
             title,
             description,
             people,
             ProjectStatus.Active
         )        
         this.projects.push(newProject);
+        this.updateListeners();
+    }
+
+    moveProject(projectId: string, newStatus: ProjectStatus) {
+        const selectedProject = this.projects.find(prj => prj.id === projectId);
+        if (selectedProject
+            && newStatus !== selectedProject.status // avoid unnecessary re-renders
+        ){
+            selectedProject.status = newStatus;
+            this.updateListeners();
+        }
+    }
+
+    updateListeners() {
         for (const listener of this.listeners) {
             listener(this.projects.slice()); // slice returns a copy rather than a reference
         }
     }
-
     // Now defined in Base Class:
     // addListener(listenerFn: Listener<Project>){
     //     this.listeners.push(listenerFn);
@@ -205,6 +218,8 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements 
         console.log(event);
         console.log('event.target:', event.target);
         console.log('this:', this);
+        event.dataTransfer!.setData('text/plain', this.project.id);
+        event.dataTransfer!.effectAllowed = "move";
     }
 
     @autobind
@@ -264,18 +279,25 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> implements Drag
     }
 
     @autobind
-    dragOverHandler(){
-        this.element.classList.add('droppable');
+    dragOverHandler(event: DragEvent){
+        if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+            event.preventDefault();  // required to allow drop
+            this.element.classList.add('droppable');
+        }
     }
 
     @autobind
-    dragLeaveHandler(){
+    dragLeaveHandler(_event: DragEvent){
         this.element.classList.remove('droppable');
     }
 
     @autobind
-    dropHandler() {
-
+    dropHandler(event: DragEvent) {
+        console.log('(dropHandler) event.dataTransfer!.getData(\'text/plain\'):', 
+            event.dataTransfer!.getData('text/plain'));
+        const projId = event.dataTransfer!.getData('text/plain');
+        globalProjectState.moveProject(projId, this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished);
+        this.element.classList.remove('droppable');
     }
 
     private populate() {
